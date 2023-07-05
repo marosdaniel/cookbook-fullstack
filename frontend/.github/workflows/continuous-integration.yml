@@ -34,7 +34,6 @@ jobs:
           path: /opt/hostedtoolcache/node
           key: ${{ runner.OS }}-${{ github.repository }}-npm-global-${{ hashFiles('**/package-lock.json') }}
 
-      - run: npm cd frontend
       - run: npm ci
       - run: npx rimraf dist
       - run: npx eslint "src/**" "**/*.{js,jsx,ts,tsx}"
