@@ -1,4 +1,5 @@
 import React, { useState, MouseEvent } from "react";
+import { useNavigate } from "react-router-dom";
 
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -11,18 +12,21 @@ import Container from "@mui/material/Container";
 import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
-import AdbIcon from "@mui/icons-material/Adb";
 
 import { useGlobalState } from "../../store/Global";
-
-const pages = ["Products", "Pricing", "Blog"];
-const settings = ["Profile", "Account", "Dashboard", "Logout"];
+import { Avatar } from "@mui/material";
+import { ENonProtectedRoutes, EProtectedRoutes } from "../../router/types";
 
 const Navbar = () => {
   const { isLoggedIn } = useGlobalState();
+  const navigate = useNavigate();
 
   const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
+
+  const logout = () => {
+    console.log("logged out");
+  };
 
   const handleOpenNavMenu = (event: MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
@@ -38,6 +42,54 @@ const Navbar = () => {
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
+
+  const handleUserSettingsClick = (setting: any) => {
+    if (setting.action) {
+      setting.action();
+    } else {
+      navigate(setting.to);
+    }
+    handleCloseUserMenu();
+  };
+
+  const navBarItems = [
+    {
+      name: "Home",
+      to: ENonProtectedRoutes.HOME,
+      disabled: false,
+    },
+    {
+      name: "Recipes",
+      to: ENonProtectedRoutes.RECIPES,
+      disabled: false,
+    },
+    {
+      name: "Articles",
+      to: ENonProtectedRoutes.ARTICLES,
+      disabled: true,
+    },
+    {
+      name: "Contact us",
+      to: ENonProtectedRoutes.CONTACT_US,
+      disabled: true,
+    },
+  ];
+
+  const userSettings = [
+    {
+      name: "Profile",
+      to: EProtectedRoutes.PROFILE,
+    },
+    {
+      name: "My Recipes",
+      to: EProtectedRoutes.MY_RECIPES,
+    },
+    {
+      name: "Logout",
+      action: logout,
+    },
+  ];
+
   return (
     <AppBar position="static">
       <Container maxWidth="xl">
@@ -71,73 +123,82 @@ const Navbar = () => {
                 display: { xs: "block", md: "none" },
               }}
             >
-              {pages.map((page) => (
-                <MenuItem key={page} onClick={handleCloseNavMenu}>
-                  <Typography textAlign="center">{page}aaaa</Typography>
+              {navBarItems.map((page) => (
+                <MenuItem
+                  key={page.name}
+                  disabled={page.disabled}
+                  onClick={() => {
+                    handleCloseNavMenu();
+                    navigate(page.to);
+                  }}
+                >
+                  <Typography textAlign="center">{page.name}</Typography>
                 </MenuItem>
               ))}
             </Menu>
           </Box>
-          <AdbIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
-          <Typography
-            variant="h5"
-            noWrap
-            component="a"
-            href=""
-            sx={{
-              mr: 2,
-              display: { xs: "flex", md: "none" },
-              flexGrow: 1,
-              fontFamily: "monospace",
-              fontWeight: 700,
-              letterSpacing: ".3rem",
-              color: "inherit",
-              textDecoration: "none",
-            }}
-          >
-            LOGO
-          </Typography>
+
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-            {pages.map((page) => (
+            {navBarItems.map((page) => (
               <Button
-                key={page}
-                onClick={handleCloseNavMenu}
+                key={page.name}
+                disabled={page.disabled}
+                onClick={() => {
+                  handleCloseNavMenu();
+                  navigate(page.to);
+                }}
                 sx={{ my: 2, color: "white", display: "block" }}
               >
-                {page}asd
+                {page.name}
               </Button>
             ))}
           </Box>
 
           <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
-              <IconButton
-                onClick={handleOpenUserMenu}
-                sx={{ p: 0 }}
-              ></IconButton>
-            </Tooltip>
-            <Menu
-              sx={{ mt: "45px" }}
-              id="menu-appbar"
-              anchorEl={anchorElUser}
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
-            >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography textAlign="center">{setting}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
+            {isLoggedIn ? (
+              <>
+                <Tooltip title="Open settings">
+                  <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                    <Avatar
+                      alt="Remy Sharp"
+                      src="/static/images/avatar/2.jpg"
+                    />
+                  </IconButton>
+                </Tooltip>
+                <Menu
+                  sx={{ mt: "45px" }}
+                  id="menu-appbar"
+                  anchorEl={anchorElUser}
+                  anchorOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                  keepMounted
+                  transformOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                  open={Boolean(anchorElUser)}
+                  onClose={handleCloseUserMenu}
+                >
+                  {userSettings.map((setting) => (
+                    <MenuItem
+                      key={setting.name}
+                      onMouseDown={() => handleUserSettingsClick(setting)}
+                    >
+                      <Typography textAlign="center">{setting.name}</Typography>
+                    </MenuItem>
+                  ))}
+                </Menu>
+              </>
+            ) : (
+              <Button
+                onClick={() => navigate(ENonProtectedRoutes.SIGNIN)}
+                sx={{ my: 2, color: "white", display: "block" }}
+              >
+                Signin
+              </Button>
+            )}
           </Box>
         </Toolbar>
       </Container>

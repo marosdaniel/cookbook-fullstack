@@ -15,12 +15,18 @@ const NotFound = loadable(() => import("../pages/NotFoundPage"), {
 export const router = createBrowserRouter([
   ...nonProtectedRoutes.map(({ path, component: Component }) => ({
     path,
-    element: <Component />,
+    element: (
+      <>
+        <Navbar />
+        <Component />
+      </>
+    ),
   })),
   ...protectedRoutes.map(({ path, component: Component }) => ({
     path,
     element: (
       <Authenticated>
+        <Navbar />
         <Component />
       </Authenticated>
     ),
@@ -31,11 +37,6 @@ export const router = createBrowserRouter([
   },
 ]);
 
-const AppNavigation = () => (
-  <div>
-    <Navbar />
-    <RouterProvider router={router} />
-  </div>
-);
+const AppNavigation = () => <RouterProvider router={router} />;
 
 export default AppNavigation;
