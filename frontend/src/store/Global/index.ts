@@ -1,1 +1,2 @@
-export { default } from './global';
+export { default } from "./global";
+export * from "./selectors";
